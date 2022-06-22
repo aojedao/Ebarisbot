@@ -1,13 +1,13 @@
-#define echoPin 2 // attach pin D2 Arduino to pin Echo of HC-SR04
-#define trigPin 3 //attach pin D3 Arduino to pin Trig of HC-SR04
-#define led_pin 13 
+const int Trigger = 2;   //Pin digital 2 para el Trigger del sensor
+const int Echo = 3;   //Pin digital 3 para el Echo del sensor
+#define led_pin 12 //rojo
+#define led_pin2 13  //verde
 int analogvoltage; 
 float voltage;
 
 
 // defines variables
 char input; //variable del celular
-int Trig = 2, Echo = 3;
 long duracion;
 long duration; // variable for the duration of sound wave travel
 int distance; // variable for the distance measurement
@@ -18,10 +18,16 @@ const int BOTON2=6;
 const int BOTON3=5;
 const int BOTON4=4;
 
-int va1;
-int va2;
-int va3;
-int va4;
+
+Arriba pin 7
+Abajo pin 6
+Derecha pin 5
+Izquierda pin 4
+int va1; //mover adelante
+int va2; // retroceso
+int va3; //derecha
+int va4; //izquierda
+
 //Pines de conexión del driver
 int Pin_Motor_Der_A = 8;
 int Pin_Motor_Der_B = 9;
@@ -34,12 +40,15 @@ void setup() {
   
   //Medidor de batería
   pinMode(led_pin, OUTPUT);
+  pinMode(led_pin2, OUTPUT);
   pinMode(A0, INPUT);
   digitalWrite(led_pin, LOW);
+  digitalWrite(led_pin2, LOW);
   
   //Configuración sensor
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
-  pinMode(echoPin, INPUT); // Sets the echoPin as an INPUT
+  pinMode(Trigger, OUTPUT); //pin como salida
+  pinMode(Echo, INPUT);  //pin como entrada
+  digitalWrite(Trigger, LOW);//Inicializamos el pin con 0
   Serial.begin(9600); // // Serial Communication is starting with 9600 of baudrate speed
   
   //Configuración pulsadores
@@ -61,65 +70,59 @@ void loop() {
   //Medidor de batería
   voltage = analogRead(A0); 
   Nivel_bateria(voltage);
-  
-  
+
+//Sensor ultrasonido
+  long t; //timepo que demora en llegar el eco
+  long d; //distancia en centimetros
+  digitalWrite(Trigger, HIGH);
+  delayMicroseconds(10);          //Enviamos un pulso de 10us
+  digitalWrite(Trigger, LOW);
+  t = pulseIn(Echo, HIGH); //obtenemos el ancho del pulso
+  d = t/59;             //escalamos el tiempo a una distancia en cm
+  Serial.print("Distancia: ");
+  Serial.print(d);      //Enviamos serialmente el valor de la distancia
+  Serial.print("cm");
+  Serial.println();
+
     input=0;
-    // Clears the trigPin condition
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-  // Calculating the distance
-  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
-
-
-  if(Serial.available()>0){ //bluetooth
-    input=Serial.read();
-  }
-
   
   //Mover el robot
   va1=digitalRead(BOTON1);
   va2=digitalRead(BOTON2);
   va3=digitalRead(BOTON3);
   va4=digitalRead(BOTON4);
-  if(distance>10){
-      Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+  
+  if(d > 5){
+    if(Serial.available()>0){ //bluetooth
+    input=Serial.read();
+  }
   if  (va1==HIGH || input=='1'){
-    digitalWrite(LED,HIGH);
     Mover_Adelante();
-    delay(2000);
+    Serial.println("1");
+    delay(500);
     }
-  if  (va2==HIGH || input=='2'){
-    digitalWrite(LED,HIGH);
+  else if  (va2==HIGH || input=='2'){
+    Serial.println("2");
     Mover_Retroceso();
-    delay(2000);
+    delay(500);
     }
-  if  (va3==HIGH  || input=='3'){
-    digitalWrite(LED,HIGH);
+  else if  (va3==HIGH  || input=='3'){
     Mover_Derecha();
-    delay(2000);
+    Serial.println("3");
+    delay(500);
     }
-   if  (va4==HIGH || input=='4'){
-    digitalWrite(LED,HIGH);
+  else  if  (va4==HIGH || input=='4'){
     Mover_Izquierda();
-    delay(2000);
+    Serial.println("4");
+    delay(500);
     }
    else{
     Mover_Stop();
     }
   }
-  else{
+else{
     Mover_Stop();
-      Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+
     }
     
 
@@ -129,15 +132,26 @@ void Nivel_bateria (float voltaje){
   if (voltage < 627) 
   {
     digitalWrite(led_pin, HIGH);
-    Serial.print("low battery:  ");
+    digitalWrite(led_pin2, LOW);
+    Serial.print("Batería baja:  ");
     Serial.println(voltage);
-    delay(1000);
+
   }
+  else if(627<voltage<700){
+        digitalWrite(led_pin, HIGH);
+    digitalWrite(led_pin2, HIGH);
+    Serial.print("Batería media:  ");
+    Serial.println(voltage);
+
+    }
+    
   else
   {
     digitalWrite(led_pin, LOW);
+    digitalWrite(led_pin2, HIGH);
+    Serial.print("Batería bien:  ");
     Serial.println(voltage);
-    delay(1000);
+
   }
   }
 
