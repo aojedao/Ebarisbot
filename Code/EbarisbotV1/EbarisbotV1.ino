@@ -99,11 +99,11 @@ void loop() {
     }
   else if  ((va3==HIGH  || input=='2')& d>17){
     Mover_Izquierda();
-    delay(250);
+    delay(175);
     }
   else  if  ((va4==HIGH || input=='1')& d>17){
     Mover_Derecha();
-    delay(250);
+    delay(175);
     }
    else{
     Mover_Stop();
