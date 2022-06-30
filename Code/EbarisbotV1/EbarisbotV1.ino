@@ -99,11 +99,11 @@ void loop() {
     }
   else if  ((va3==HIGH  || input=='2')& d>17){
     Mover_Izquierda();
-    delay(500);
+    delay(250);
     }
   else  if  ((va4==HIGH || input=='1')& d>17){
     Mover_Derecha();
-    delay(500);
+    delay(250);
     }
    else{
     Mover_Stop();
@@ -117,7 +117,7 @@ void Nivel_bateria (float voltaje){
   if (voltage < 627) 
   {
     definirColor(255, 0,true);  // rojo
-    Serial.print("Batería baja:");
+    Serial.print("Batería baja:  ");
     Serial.println(voltage);
 
   }
